@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  hugo:
+    image: hugomods/hugo:exts-0.134.2
+    container_name: hugo-toha
+    ports:
+      - "1313:1313"
+    volumes:
+      - ./:/src
+    command: server --bind=0.0.0.0 --baseURL=http://localhost --buildDrafts --buildFuture
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hugo.entrypoints=http"
+      - "traefik.http.routers.hugo.rule=Host(`hugo.local.codistech.live`)"
+      - "traefik.http.services.hugo.loadbalancer.server.port=1313"
+      - "traefik.http.routers.hugo.middlewares=hugo-https-redirect"
+      - "traefik.http.routers.hugo-secure.entrypoints=https"
+      - "traefik.http.routers.hugo-secure.rule=Host(`hugo.local.codistech.live`)"
+      - "traefik.http.routers.hugo-secure.tls=true"
+      - "traefik.http.services.hugo.loadbalancer.server.scheme=http"
+
+networks:
+  proxy:
+    external: true
